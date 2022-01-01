@@ -198,7 +198,6 @@ static float const MIDDLE_OF_ROOM    = 400.0f;
 static float const FACE_THE_DOOR     = 0.08726646f;
 static float const FACE_THE_PLATFORM = 3.118662f;
 
-
 struct boss_shade_of_akama : public BossAI
 {
     boss_shade_of_akama(Creature* creature) : BossAI(creature, DATA_SHADE_OF_AKAMA)
@@ -217,7 +216,7 @@ struct boss_shade_of_akama : public BossAI
         _Reset();
         Initialize();
         me->SetImmuneToPC(true);
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STUN);
         me->SetWalk(true);
         events.ScheduleEvent(EVENT_INITIALIZE_SPAWNERS, 1s);
@@ -229,7 +228,7 @@ struct boss_shade_of_akama : public BossAI
         events.Reset();
         summons.DespawnAll();
 
-        for (ObjectGuid const spawnerGuid : _spawners)
+        for (ObjectGuid spawnerGuid : _spawners)
             if (Creature* spawner = ObjectAccessor::GetCreature(*me, spawnerGuid))
                 spawner->AI()->DoAction(ACTION_DESPAWN_ALL_SPAWNS);
 
@@ -256,12 +255,12 @@ struct boss_shade_of_akama : public BossAI
         if (_isInPhaseOne && motionType == CHASE_MOTION_TYPE)
         {
             _isInPhaseOne = false;
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             me->SetImmuneToPC(false);
             me->SetWalk(false);
             events.ScheduleEvent(EVENT_ADD_THREAT, Milliseconds(100));
 
-            for (ObjectGuid const spawnerGuid : _spawners)
+            for (ObjectGuid spawnerGuid : _spawners)
                 if (Creature* spawner = ObjectAccessor::GetCreature(*me, spawnerGuid))
                     spawner->AI()->DoAction(ACTION_STOP_SPAWNING);
         }
@@ -274,7 +273,7 @@ struct boss_shade_of_akama : public BossAI
         if (Creature* akama = instance->GetCreature(DATA_AKAMA_SHADE))
             akama->AI()->DoAction(ACTION_SHADE_OF_AKAMA_DEAD);
 
-        for (ObjectGuid const spawnerGuid : _spawners)
+        for (ObjectGuid spawnerGuid : _spawners)
             if (Creature* spawner = ObjectAccessor::GetCreature(*me, spawnerGuid))
                 spawner->AI()->DoAction(ACTION_DESPAWN_ALL_SPAWNS);
 
@@ -316,11 +315,11 @@ struct boss_shade_of_akama : public BossAI
                 }
                 case EVENT_START_CHANNELERS_AND_SPAWNERS:
                 {
-                    for (ObjectGuid const summonGuid : summons)
+                    for (ObjectGuid summonGuid : summons)
                         if (Creature* channeler = ObjectAccessor::GetCreature(*me, summonGuid))
-                            channeler->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            channeler->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
-                    for (ObjectGuid const spawnerGuid : _spawners)
+                    for (ObjectGuid spawnerGuid : _spawners)
                         if (Creature* spawner = ObjectAccessor::GetCreature(*me, spawnerGuid))
                             spawner->AI()->DoAction(ACTION_START_SPAWNING);
 
@@ -398,7 +397,7 @@ struct npc_akama_shade : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*who*/, uint32& /*damage*/) override
+    void DamageTaken(Unit* /*who*/, uint32& /*damage*/, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
     {
         if (me->HealthBelowPct(20) && !_hasYelledOnce)
         {
@@ -566,7 +565,7 @@ struct npc_ashtongue_channeler : public PassiveAI
         {
             if (Creature* shade = _instance->GetCreature(DATA_SHADE_OF_AKAMA))
             {
-                if (shade->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                if (shade->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
                     DoCastSelf(SPELL_SHADE_SOUL_CHANNEL);
 
                 else
@@ -575,7 +574,7 @@ struct npc_ashtongue_channeler : public PassiveAI
 
             channel.Repeat(Seconds(2));
         });
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void UpdateAI(uint32 diff) override
@@ -693,7 +692,7 @@ struct npc_ashtongue_sorcerer : public ScriptedAI
     {
         if (Creature* shade = _instance->GetCreature(DATA_SHADE_OF_AKAMA))
         {
-            if (shade->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            if (shade->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
                 me->GetMotionMaster()->MovePoint(0, shade->GetPosition());
 
             else if (Creature* akama = _instance->GetCreature(DATA_AKAMA_SHADE))
@@ -731,7 +730,7 @@ struct npc_ashtongue_sorcerer : public ScriptedAI
             {
                 if (Creature* shade = _instance->GetCreature(DATA_SHADE_OF_AKAMA))
                 {
-                    if (shade->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    if (shade->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
                     {
                         me->SetFacingToObject(shade);
                         DoCastSelf(SPELL_SHADE_SOUL_CHANNEL);
@@ -794,7 +793,6 @@ struct npc_ashtongue_defender : public ScriptedAI
         _events.ScheduleEvent(EVENT_DEBILITATING_STRIKE, 10s, 16s);
         _events.ScheduleEvent(EVENT_WINDFURY, 8s, 12s);
     }
-
 
     void UpdateAI(uint32 diff) override
     {
@@ -984,7 +982,7 @@ struct npc_ashtongue_spiritbinder : public ScriptedAI
         _events.ScheduleEvent(EVENT_SPIRIT_HEAL, 5s, 6s);
     }
 
-    void DamageTaken(Unit* /*who*/, uint32& /*damage*/) override
+    void DamageTaken(Unit* /*who*/, uint32& /*damage*/, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
     {
         if (!_spiritMend)
             if (HealthBelowPct(30))

@@ -241,7 +241,6 @@ public:
 
         void MoveInLineOfSight(Unit* /*who*/) override { }
 
-
         void UpdateAI(uint32 /*diff*/) override
         {
             if (!UpdateVictim())
@@ -836,6 +835,7 @@ enum InfectedWorgenBite
     SPELL_WORGENS_CALL         = 53095
 };
 
+// 53094 - Infected Worgen Bite
 class spell_infected_worgen_bite : public SpellScriptLoader
 {
     public:

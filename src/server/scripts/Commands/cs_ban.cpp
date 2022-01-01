@@ -389,7 +389,6 @@ public:
             fields[0].GetCString(), fields[1].GetCString(), permanent ? handler->GetTrinityString(LANG_BANINFO_NEVER) : fields[2].GetCString(),
             permanent ? handler->GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[3].GetUInt64(), TimeFormat::ShortText).c_str(), fields[4].GetCString(), fields[5].GetCString());
 
-
         return true;
     }
 
@@ -703,6 +702,7 @@ public:
             return false;
         }
 
+        handler->PSendSysMessage(LANG_UNBAN_UNBANNED, name.c_str());
         return true;
     }
 

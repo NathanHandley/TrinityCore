@@ -46,7 +46,6 @@ enum Spells
     SPELL_SUBMERGE          = 37550,
     SPELL_EMERGE            = 20568,
 
-
     // Ambusher spells
     SPELL_SPREAD_SHOT       = 37790,
     SPELL_SHOOT             = 37770,
@@ -156,7 +155,7 @@ public:
             instance->SetData(DATA_STRANGE_POOL, NOT_STARTED);
             DoCast(me, SPELL_SUBMERGE); // submerge anim
             me->SetVisible(false); // we start invis under water, submerged
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             me->SetImmuneToPC(true);
         }
 
@@ -219,7 +218,7 @@ public:
                         WaitTimer = 3000;
                         CanStartEvent = true; // fresh fished from pool
                         me->SetImmuneToPC(false);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     }
                     else
                         WaitTimer -= diff;

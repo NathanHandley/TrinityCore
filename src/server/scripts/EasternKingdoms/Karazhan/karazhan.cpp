@@ -199,7 +199,7 @@ public:
                         me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f,
                         TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 1min))
                     {
-                        spotlight->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        spotlight->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                         spotlight->CastSpell(spotlight, SPELL_SPOTLIGHT, false);
                         m_uiSpotlightGUID = spotlight->GetGUID();
                     }
@@ -422,7 +422,6 @@ public:
 #define SAY_DIALOG_ARCANAGOS_8      "What have you done, wizard? This cannot be! I'm burning from... within!"
 #define SAY_DIALOG_MEDIVH_9         "He should not have angered me. I must go... recover my strength now..."
 
-
 static float MedivPos[4] = {-11161.49f, -1902.24f, 91.48f, 1.94f};
 static float ArcanagosPos[4] = {-11169.75f, -1881.48f, 95.39f, 4.83f};
 
@@ -468,6 +467,7 @@ public:
         void Reset() override
         {
             Initialize();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
             if (instance->GetGuidData(DATA_IMAGE_OF_MEDIVH).IsEmpty())
             {
