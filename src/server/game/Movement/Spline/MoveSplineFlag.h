@@ -58,7 +58,7 @@ namespace Movement
 
             // Masks
             Mask_Final_Facing   = Final_Point | Final_Target | Final_Angle,
-            // animation ids stored here, see AnimationTier enum, used with Animation flag
+            // animation ids stored here, see AnimTier enum, used with Animation flag
             Mask_Animations     = 0xFF,
             // flags that shouldn't be appended into SMSG_MONSTER_MOVE\SMSG_MONSTER_MOVE_TRANSPORT packet, should be more probably
             Mask_No_Monster_Move = Mask_Final_Facing | Mask_Animations | Done,
@@ -102,7 +102,7 @@ namespace Movement
         void EnableTransportEnter() { raw() = (raw() & ~TransportExit) | TransportEnter; }
         void EnableTransportExit() { raw() = (raw() & ~TransportEnter) | TransportExit; }
 
-        uint8 animTier           : 8;
+        uint8 animTier;
         bool done                : 1;
         bool falling             : 1;
         bool no_spline           : 1;

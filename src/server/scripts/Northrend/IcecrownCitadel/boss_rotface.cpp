@@ -15,13 +15,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptMgr.h"
-#include "GridNotifiers.h"
 #include "icecrown_citadel.h"
+#include "Containers.h"
+#include "GridNotifiers.h"
 #include "InstanceScript.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "ScriptedCreature.h"
+#include "ScriptMgr.h"
 #include "SpellAuras.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
@@ -682,12 +683,10 @@ class spell_rotface_unstable_ooze_explosion : public SpellScript
 
         uint32 triggered_spell_id = GetEffectInfo().TriggerSpell;
 
-        float x, y, z;
-        GetExplTargetDest()->GetPosition(x, y, z);
         // let Rotface handle the cast - caster dies before this executes
         if (InstanceScript* script = GetCaster()->GetInstanceScript())
             if (Creature* rotface = script->instance->GetCreature(script->GetGuidData(DATA_ROTFACE)))
-                rotface->CastSpell({x, y, z}, triggered_spell_id, GetCaster()->GetGUID());
+                rotface->CastSpell(*GetExplTargetDest(), triggered_spell_id, GetCaster()->GetGUID());
     }
 
     void Register() override

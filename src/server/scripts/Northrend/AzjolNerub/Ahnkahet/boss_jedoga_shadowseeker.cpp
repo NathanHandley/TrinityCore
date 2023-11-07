@@ -16,6 +16,7 @@
  */
 
 #include "ahnkahet.h"
+#include "Containers.h"
 #include "InstanceScript.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
@@ -251,7 +252,7 @@ struct boss_jedoga_shadowseeker : public BossAI
             if (_initiateGUIDS.empty())
             {
                 DoCastSelf(SPELL_HOVER_FALL_1);
-                me->SetAnimationTier(AnimationTier::Ground);
+                me->SetAnimTier(AnimTier::Ground);
                 events.ScheduleEvent(EVENT_START_FIGHT_1, Seconds(1));
             }
         }
@@ -279,7 +280,7 @@ struct boss_jedoga_shadowseeker : public BossAI
         switch (pointId)
         {
             case POINT_GROUND:
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                me->RemoveUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                 me->SetReactState(REACT_AGGRESSIVE);
                 DoZoneInCombat();
                 events.ScheduleEvent(EVENT_CYCLONE_STRIKE, 3s);
@@ -329,7 +330,7 @@ struct boss_jedoga_shadowseeker : public BossAI
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->InterruptNonMeleeSpells(true);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                    me->SetUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                     me->GetMotionMaster()->MovePoint(POINT_PHASE_TWO, JedogaGroundPosition);
                     break;
                 case EVENT_FLY_DELAY:
@@ -416,7 +417,7 @@ struct npc_twilight_volunteer : public ScriptedAI
             me->RemoveAurasDueToSpell(SPELL_SPHERE_VISUAL_VOLUNTEER);
             Talk(SAY_CHOSEN);
             me->SetStandState(UNIT_STAND_STATE_STAND);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+            me->RemoveUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
             me->SetWalk(true);
             me->GetMotionMaster()->MovePoint(POINT_SACRIFICE, JedogaSacrificePosition);
         }

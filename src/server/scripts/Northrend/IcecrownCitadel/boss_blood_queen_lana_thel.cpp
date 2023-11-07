@@ -15,18 +15,19 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptMgr.h"
-#include "GridNotifiers.h"
 #include "icecrown_citadel.h"
+#include "Containers.h"
+#include "GridNotifiers.h"
 #include "InstanceScript.h"
 #include "Map.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
+#include "Player.h"
 #include "ScriptedCreature.h"
-#include "Spell.h"
+#include "ScriptMgr.h"
+#include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
-#include "SpellAuraEffects.h"
 
 enum Texts
 {
@@ -209,8 +210,8 @@ struct boss_blood_queen_lana_thel : public BossAI
                 player->RewardPlayerAndGroupAtEvent(Is25ManRaid() ? NPC_INFILTRATOR_MINCHAR_BQ_25 : NPC_INFILTRATOR_MINCHAR_BQ, player);
             if (Creature* minchar = me->FindNearestCreature(NPC_INFILTRATOR_MINCHAR_BQ, 200.0f))
             {
-                minchar->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                minchar->SetAnimationTier(AnimationTier::Ground);
+                minchar->SetEmoteState(EMOTE_ONESHOT_NONE);
+                minchar->SetAnimTier(AnimTier::Ground);
                 minchar->SetCanFly(false);
                 minchar->RemoveAllAuras();
                 minchar->GetMotionMaster()->MoveCharge(4629.3711f, 2782.6089f, 401.5301f, SPEED_CHARGE / 3.0f);
@@ -399,7 +400,7 @@ struct boss_blood_queen_lana_thel : public BossAI
                     break;
                 }
                 case EVENT_DELIRIOUS_SLASH:
-                    if (_offtankGUID && me->GetAnimationTier() != AnimationTier::Fly)
+                    if (_offtankGUID && me->GetAnimTier() != AnimTier::Fly)
                         if (Player* _offtank = ObjectAccessor::GetPlayer(*me, _offtankGUID))
                             DoCast(_offtank, SPELL_DELIRIOUS_SLASH);
                     events.ScheduleEvent(EVENT_DELIRIOUS_SLASH, 20s, 24s, EVENT_GROUP_NORMAL);

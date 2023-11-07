@@ -19,7 +19,6 @@
 #include "Errors.h"
 #include "Log.h"
 #include "Optional.h"
-#include "Util.h"
 
 #include "Hacks/boost_1_73_process_windows_nopch.h"
 
@@ -54,10 +53,19 @@ public:
 
     std::streamsize write(char const* str, std::streamsize size)
     {
-        std::string consoleStr(str, size);
-        RemoveCRLF(consoleStr);
-        callback_(consoleStr);
-        return size;
+        std::string_view consoleStr(str, size);
+        size_t lineEnd = consoleStr.find_first_of("\r\n");
+        std::streamsize processedCharacters = size;
+        if (lineEnd != std::string_view::npos)
+        {
+            consoleStr = consoleStr.substr(0, lineEnd);
+            processedCharacters = lineEnd + 1;
+        }
+
+        if (!consoleStr.empty())
+            callback_(consoleStr);
+
+        return processedCharacters;
     }
 };
 
@@ -74,13 +82,28 @@ static int CreateChildProcess(T waiter, std::string const& executable,
                               std::string const& logger, std::string const& input,
                               bool secure)
 {
+#if TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
+#pragma warning(push)
+#pragma warning(disable:4297)
+/*
+  Silence warning with boost 1.83
+
+    boost/process/pipe.hpp(132,5): warning C4297: 'boost::process::basic_pipebuf<char,std::char_traits<char>>::~basic_pipebuf': function assumed not to throw an exception but does
+    boost/process/pipe.hpp(132,5): message : destructor or deallocator has a (possibly implicit) non-throwing exception specification
+    boost/process/pipe.hpp(124,6): message : while compiling class template member function 'boost::process::basic_pipebuf<char,std::char_traits<char>>::~basic_pipebuf(void)'
+    boost/process/pipe.hpp(304,42): message : see reference to class template instantiation 'boost::process::basic_pipebuf<char,std::char_traits<char>>' being compiled
+*/
+#endif
     ipstream outStream;
     ipstream errStream;
+#if TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
+#pragma warning(pop)
+#endif
 
     if (!secure)
     {
-        TC_LOG_TRACE(logger, "Starting process \"%s\" with arguments: \"%s\".",
-                executable.c_str(), boost::algorithm::join(argsVector, " ").c_str());
+        TC_LOG_TRACE(logger, "Starting process \"{}\" with arguments: \"{}\".",
+                executable, boost::algorithm::join(argsVector, " "));
     }
 
     // prepare file with only read permission (boost process opens with read_write)
@@ -119,14 +142,14 @@ static int CreateChildProcess(T waiter, std::string const& executable,
         }
     }();
 
-    auto outInfo = MakeTCLogSink([&](std::string const& msg)
+    auto outInfo = MakeTCLogSink([&](std::string_view msg)
     {
-        TC_LOG_INFO(logger, "%s", msg.c_str());
+        TC_LOG_INFO(logger, "{}", msg);
     });
 
-    auto outError = MakeTCLogSink([&](std::string const& msg)
+    auto outError = MakeTCLogSink([&](std::string_view msg)
     {
-        TC_LOG_ERROR(logger, "%s", msg.c_str());
+        TC_LOG_ERROR(logger, "{}", msg);
     });
 
     copy(outStream, outInfo);
@@ -138,8 +161,8 @@ static int CreateChildProcess(T waiter, std::string const& executable,
 
     if (!secure)
     {
-        TC_LOG_TRACE(logger, ">> Process \"%s\" finished with return value %i.",
-                executable.c_str(), result);
+        TC_LOG_TRACE(logger, ">> Process \"{}\" finished with return value {}.",
+                executable, result);
     }
 
     return result;

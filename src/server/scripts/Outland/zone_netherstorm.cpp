@@ -27,6 +27,7 @@ npc_commander_dawnforge
 EndContentData */
 
 #include "ScriptMgr.h"
+#include "Containers.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -495,7 +496,7 @@ class spell_detonate_teleporter : public SpellScript
 
     void HandleScript(SpellEffIndex /*effIndex*/)
     {
-        if (Unit* creature = GetHitCreature())
+        if (Creature* creature = GetHitCreature())
         {
             if (Unit* charmer = GetCaster()->GetCharmerOrOwner())
             {
