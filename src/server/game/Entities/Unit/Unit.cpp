@@ -8585,7 +8585,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
         case MOVE_FLIGHT:
         {
             // Set creature speed rate
-            if (isPet() && !isInCombat())
+            if (IsPet() && !IsInCombat())
             {
                 // For every yard over 5, increase speed by 0.01
                 //  to help prevent pet from lagging behind and despawning
