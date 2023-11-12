@@ -8585,23 +8585,27 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
         case MOVE_FLIGHT:
         {
             // Set creature speed rate
-            if (IsPet() && !IsInCombat())
+            if (GetTypeId() == TYPEID_UNIT)
             {
-                // For every yard over 5, increase speed by 0.01
-                //  to help prevent pet from lagging behind and despawning
-                float dist = GetDistance(GetCharmerOrOwner());
-                float base_rate = 1.00f; // base speed is 100% of owner speed
+                Unit* pOwner = GetCharmerOrOwner();
+                if (IsPet() && !IsInCombat() && pOwner) // Must check for owner or crash on "Tame Beast"
+                {
+                    // For every yard over 5, increase speed by 0.01
+                    //  to help prevent pet from lagging behind and despawning
+                    float dist = GetDistance(pOwner);
+                    float base_rate = 1.00f; // base speed is 100% of owner speed
 
-                if (dist < 5)
-                    dist = 5;
+                    if (dist < 5)
+                        dist = 5;
 
-                float mult = base_rate + ((dist - 5) * 0.01f);
+                    float mult = base_rate + ((dist - 5) * 0.01f);
 
-                speed *= GetCharmerOrOwner()->GetSpeedRate(mtype) * mult; // pets default to owner's speed when not in combat
+                    speed *= pOwner->GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
+                }
+                else
+                    speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
             }
-            else
-                speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
-
+            
             // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
             /// @todo possible affect only on MOVE_RUN
             if (int32 normalization = GetMaxPositiveAuraModifier(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
